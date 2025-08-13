@@ -22,7 +22,7 @@ if (Test-Path ".git") {
 # Create .gitignore file if it doesn't exist
 if (-not (Test-Path ".gitignore")) {
     Write-Host "Creating .gitignore file..." -ForegroundColor Yellow
-    
+
     $gitignoreContent = @'
 # Python
 __pycache__/
