@@ -62,3 +62,4 @@ jobs:
           app-name: 'CTS-VibeAppce41212-4'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0134EB5D1AA4494F9F25EC62DD7D3EF0 }}
+          startup-command: 'gunicorn --bind 0.0.0.0:8000 --timeout 120 main:application'
