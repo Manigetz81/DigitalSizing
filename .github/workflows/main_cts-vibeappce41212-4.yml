@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Create and start virtual environment
         run: |
@@ -31,6 +31,9 @@ jobs:
       
       - name: Install dependencies
         run: pip install -r requirements.txt
+        
+      - name: Validate build configuration
+        run: python validate_build.py
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
