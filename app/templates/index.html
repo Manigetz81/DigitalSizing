@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Sizing - AI-Powered Size Recommendation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .upload-area {
+            border: 3px dashed #007bff;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .feature-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-ruler-combined me-2"></i>
+                Digital Sizing
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Find Your Perfect Size</h1>
+                    <p class="lead mb-4">Upload a photo and get AI-powered clothing size recommendations instantly. No
+                        more guessing, no more returns.</p>
+                    <a href="#upload-section" class="btn btn-light btn-lg">
+                        <i class="fas fa-camera me-2"></i>
+                        Start Sizing
+                    </a>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="fas fa-user-friends" style="font-size: 200px; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload-section" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="text-center mb-5">Upload Your Photo</h2>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {% for message in messages %}
+                        {{ message }}
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <h4>Drag & Drop Your Photo Here</h4>
+                            <p class="text-muted">or click to browse files</p>
+                            <input type="file" class="form-control d-none" id="fileInput" name="file" accept="image/*"
+                                required>
+                            <button type="button" class="btn btn-primary"
+                                onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open me-2"></i>
+                                Choose File
+                            </button>
+                        </div>
+
+                        <div class="file-info" id="fileInfo">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-image fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h6 class="mb-1" id="fileName"></h6>
+                                    <small class="text-muted" id="fileSize"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar"
+                                    role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <p class="text-center mt-2" id="progressText">Processing your image...</p>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                <i class="fas fa-magic me-2"></i>
+                                Analyze Size
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="feature-card card h-100 p-4">
+                        <i class="fas fa-camera fa-3x text-primary mb-3"></i>
+                        <h5>1. Upload Photo</h5>
+                        <p>Take or upload a full-body photo with good lighting</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="feature-card card h-100 p-4">
+                        <i class="fas fa-search fa-3x text-success mb-3"></i>
+                        <h5>2. AI Analysis</h5>
+                        <p>Our AI detects body landmarks and calculates measurements</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="feature-card card h-100 p-4">
+                        <i class="fas fa-tshirt fa-3x text-info mb-3"></i>
+                        <h5>3. Size Recommendations</h5>
+                        <p>Get personalized size recommendations for different clothing types</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Features</h2>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-bolt text-warning fa-2x me-3"></i>
+                        <div>
+                            <h5>Lightning Fast</h5>
+                            <p>Get size recommendations in seconds with our optimized AI models</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-shield-alt text-success fa-2x me-3"></i>
+                        <div>
+                            <h5>Privacy First</h5>
+                            <p>Your photos are processed securely and not stored on our servers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-chart-line text-primary fa-2x me-3"></i>
+                        <div>
+                            <h5>High Accuracy</h5>
+                            <p>Advanced computer vision ensures precise body measurements</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-globe text-info fa-2x me-3"></i>
+                        <div>
+                            <h5>Multiple Brands</h5>
+                            <p>Support for various clothing brands and international sizing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-ruler-combined me-2"></i>Digital Sizing</h5>
+                    <p>AI-powered clothing size recommendations</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Digital Sizing. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form submission with progress
+        uploadForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!fileInput.files[0]) {
+                alert('Please select a file first');
+                return;
+            }
+
+            // Show progress
+            progressContainer.style.display = 'block';
+            submitBtn.disabled = true;
+
+            // Simulate progress (replace with actual progress tracking if needed)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) progress = 90;
+
+                progressBar.style.width = progress + '%';
+                progressBar.setAttribute('aria-valuenow', progress);
+
+                if (progress > 30) {
+                    progressText.textContent = 'Detecting body landmarks...';
+                }
+                if (progress > 60) {
+                    progressText.textContent = 'Calculating measurements...';
+                }
+                if (progress > 80) {
+                    progressText.textContent = 'Generating size recommendations...';
+                }
+            }, 200);
+
+            // Submit form
+            const formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    progressText.textContent = 'Complete!';
+
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                })
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => {
+                    clearInterval(progressInterval);
+                    progressContainer.style.display = 'none';
+                    submitBtn.disabled = false;
+                    alert('Error processing image: ' + error.message);
+                });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

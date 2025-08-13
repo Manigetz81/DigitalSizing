@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Model files
+*.h5
+*.pkl
+*.joblib
+
+# Temporary files
+temp/
+tmp/
+
+# Debug and test files (optional - remove these lines to include them in repo)
+debug_*.py
+test_measurement_improvements.py
+final_measurement_test.py
+
+# Documentation files that might be temporary
+~$*.docx
+*.tmp

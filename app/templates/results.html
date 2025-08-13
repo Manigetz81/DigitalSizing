@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Size Recommendations - Digital Sizing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .results-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 60px 0;
+        }
+
+        .measurement-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .measurement-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .size-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .confidence-high {
+            border-left: 5px solid #28a745;
+        }
+
+        .confidence-medium {
+            border-left: 5px solid #ffc107;
+        }
+
+        .confidence-low {
+            border-left: 5px solid #dc3545;
+        }
+
+        .confidence-badge-high {
+            background: #28a745;
+        }
+
+        .confidence-badge-medium {
+            background: #ffc107;
+        }
+
+        .confidence-badge-low {
+            background: #dc3545;
+        }
+
+        .measurement-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .size-recommendation {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .fit-note {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-left: 3px solid #007bff;
+        }
+
+        .uploaded-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-ruler-combined me-2"></i>
+                Digital Sizing
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>
+                    Try Another Image
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Results Header -->
+    <section class="results-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-check-circle me-3"></i>
+                        Analysis Complete!
+                    </h1>
+                    <p class="lead">Here are your personalized size recommendations based on AI analysis of your image.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="confidence-score">
+                        {% set confidence_class = 'high' if confidence > 0.8 else 'medium' if confidence > 0.6 else
+                        'low' %}
+                        <div class="badge confidence-badge-{{ confidence_class }} p-3 fs-5">
+                            {{ "%.0f"|format(confidence * 100) }}% Confidence
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Results -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Uploaded Image -->
+                <div class="col-lg-4 mb-4">
+                    <div class="text-center">
+                        <h4 class="mb-3">Your Image</h4>
+                        <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Uploaded image"
+                            class="uploaded-image">
+                    </div>
+                </div>
+
+                <!-- Measurements -->
+                <div class="col-lg-8">
+                    <h3 class="mb-4">
+                        <i class="fas fa-ruler me-2"></i>
+                        Body Measurements
+                    </h3>
+                    <div class="row">
+                        {% for measurement, value in measurements.items() %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="measurement-card card h-100">
+                                <div class="card-body text-center">
+                                    <div class="measurement-icon mx-auto mb-3">
+                                        {% if measurement == 'height' %}
+                                        <i class="fas fa-arrows-alt-v"></i>
+                                        {% elif 'circumference' in measurement %}
+                                        <i class="fas fa-circle"></i>
+                                        {% elif 'width' in measurement %}
+                                        <i class="fas fa-arrows-alt-h"></i>
+                                        {% elif 'length' in measurement %}
+                                        <i class="fas fa-ruler-horizontal"></i>
+                                        {% else %}
+                                        <i class="fas fa-ruler"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="text-muted text-uppercase small">
+                                        {{ measurement.replace('_', ' ').title() }}
+                                    </h6>
+                                    <h4 class="text-primary mb-0">{{ "%.1f"|format(value) }} cm</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Size Recommendations -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h3 class="text-center mb-5">
+                <i class="fas fa-tshirt me-2"></i>
+                Size Recommendations
+            </h3>
+
+            <div class="row">
+                {% for category, recommendation in size_recommendations.items() %}
+                <div class="col-lg-6 col-xl-3 mb-4">
+                    {% set conf_class = 'high' if recommendation.confidence > 0.8 else 'medium' if
+                    recommendation.confidence > 0.6 else 'low' %}
+                    <div class="size-card card h-100 confidence-{{ conf_class }}">
+                        <div class="card-header bg-transparent">
+                            <h5 class="card-title mb-0 text-center">
+                                {% if category == 'tops' %}
+                                <i class="fas fa-tshirt me-2"></i>Tops/Shirts
+                                {% elif category == 'bottoms' %}
+                                <i class="fas fa-user-tie me-2"></i>Pants/Bottoms
+                                {% elif category == 'dresses' %}
+                                <i class="fas fa-female me-2"></i>Dresses
+                                {% elif category == 'outerwear' %}
+                                <i class="fas fa-coat-of-arms me-2"></i>Jackets/Coats
+                                {% else %}
+                                <i class="fas fa-clothes-hanger me-2"></i>{{ category.title() }}
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="size-recommendation mb-3">
+                                {{ recommendation.size }}
+                            </div>
+                            <div class="badge confidence-badge-{{ conf_class }} mb-3">
+                                {{ "%.0f"|format(recommendation.confidence * 100) }}% Match
+                            </div>
+
+                            {% if recommendation.fit_notes %}
+                            <div class="fit-notes mt-3">
+                                <h6 class="text-muted small">Fit Notes:</h6>
+                                {% for note in recommendation.fit_notes %}
+                                <div class="fit-note small">
+                                    {{ note }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Additional Information -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow">
+                        <div class="card-body p-5">
+                            <h4 class="text-center mb-4">
+                                <i class="fas fa-info-circle text-primary me-2"></i>
+                                Important Notes
+                            </h4>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Accuracy Tips</h6>
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-1">• Best results with full-body photos</li>
+                                        <li class="mb-1">• Stand straight facing the camera</li>
+                                        <li class="mb-1">• Ensure good lighting conditions</li>
+                                        <li class="mb-1">• Wear fitted clothing for analysis</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-shopping-cart text-success me-2"></i>Shopping Tips</h6>
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-1">• Check brand-specific size charts</li>
+                                        <li class="mb-1">• Consider fabric stretch and fit</li>
+                                        <li class="mb-1">• When in doubt, size up</li>
+                                        <li class="mb-1">• Read customer reviews for fit</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Your image was processed securely and has been automatically deleted.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="py-4 bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <a href="/" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-camera me-2"></i>
+                        Analyze Another Photo
+                    </a>
+                    <button class="btn btn-outline-light btn-lg" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>
+                        Save Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-ruler-combined me-2"></i>Digital Sizing</h6>
+                    <p class="small text-muted">AI-powered clothing size recommendations</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small text-muted">&copy; 2025 Digital Sizing. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate measurement cards
+            const cards = document.querySelectorAll('.measurement-card, .size-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add tooltip for confidence scores
+            const confidenceBadges = document.querySelectorAll('[class*="confidence-badge-"]');
+            confidenceBadges.forEach(badge => {
+                badge.addEventListener('mouseenter', function () {
+                    const confidence = this.textContent.match(/\d+/)[0];
+                    let tooltip = '';
+
+                    if (confidence >= 90) {
+                        tooltip = 'Excellent match - Very confident in this recommendation';
+                    } else if (confidence >= 80) {
+                        tooltip = 'Good match - Confident in this recommendation';
+                    } else if (confidence >= 70) {
+                        tooltip = 'Reasonable match - Moderately confident';
+                    } else {
+                        tooltip = 'Uncertain match - Consider trying adjacent sizes';
+                    }
+
+                    this.setAttribute('title', tooltip);
+                });
+            });
+        });
+
+        // Share functionality (if needed in future)
+        function shareResults() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Size Recommendations - Digital Sizing',
+                    text: 'Check out my AI-generated clothing size recommendations!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
