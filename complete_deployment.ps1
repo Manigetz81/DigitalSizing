@@ -74,6 +74,7 @@ try {
 
 # Check if the app service exists
 Write-Host "Checking Azure App Service: $AppName" -ForegroundColor Yellow
+$appUrl = "https://$AppName.azurewebsites.net"
 try {
     $appInfo = az webapp show --name $AppName --resource-group $ResourceGroupName 2>$null | ConvertFrom-Json
     if ($appInfo) {
@@ -102,7 +103,7 @@ try {
     }
 } catch {
     Write-Host "❌ Error checking App Service: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
+    Write-Host "Using default URL: $appUrl" -ForegroundColor Yellow
 }
 
 # Configure App Service settings
